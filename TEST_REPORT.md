@@ -187,3 +187,57 @@ python tools/ui_check.py --url http://localhost:5173/ --out ./.artifacts
   仅验证点击不抛错；SVG 导出已用字符串断言覆盖。
 - 工坊左栏在「正交双折」下只占四分之一画面，靠浅网格与虚线原始轮廓提供空间参照。
 - 未做 axe 无障碍扫描；仅人工检查焦点与标签。
+
+---
+
+## 2026-10-30 · Milestone 4（逐关验证与缺陷修复）
+
+### T9 六关逐关通关（生产构建）
+
+```bash
+npm run build
+npx vite preview --port 4173 --strictPort
+python tools/level_check.py --url http://localhost:4173/ --out ./.artifacts-prod
+```
+
+脚本对每一关执行：折叠 → 设角度 → 设偏移 → 必要时换保留侧 → 剪一刀 → 展开 → 读判定。
+
+| 关卡 | 角度是否锁定 | 判定 | IoU |
+|---|---|---|---|
+| corner-first（角落初探） | 否 | 完全吻合 | 1.0000 |
+| mirror-gate（镜像之门） | 否 | 完全吻合 | 0.9997 |
+| diamond-miracle（菱形奇迹） | 否 | 完全吻合 | 0.9998 |
+| size-riddle（大小之谜） | **是** | 完全吻合 | 0.9996 |
+| angle-riddle（角度之谜） | 否 | 完全吻合 | 1.0000 |
+| diamond-from-square（方中取菱） | 否 | 完全吻合 | 0.9997 |
+
+`allPerfect: true`，`errors: []`。截图：`.artifacts-prod/level-*.png`。
+
+### T10 缺陷：通关后画面仍停在折叠纸包
+
+- **现象**：第 3 关判定显示「完全吻合」，但画布上仍是一个带缺口的四分之一纸包。
+- **影响范围**：所有含折叠的关卡（第 2–6 关）；第 1 关因无折叠而不可见，
+  这也解释了为什么早期的第 1 关截图"看起来是对的"。
+- **根因**：`src/pages/Puzzle.tsx` 的动画驱动里，`revealed` 落到了默认分支 `setAnim(1)`，
+  而 `progress` 由 `anim` 计算，于是四层仍按折叠位置渲染。
+- **修复**：`phase === 'ready' || phase === 'revealed'` → `setAnim(0)`，并加注释说明原因。
+- **复验**：重跑 T9，六关截图均显示完整展开的纸形（`level-diamond-miracle.png` 为红纸 + 中心菱形孔）。
+- **附加修复**：
+  - 展开完成后改用合并多边形渲染，消除四条折痕处的可见接缝；
+  - 纸面光泽改为 `userSpaceOnUse`，跨层连续；
+  - 偏移滑块步长 0.005 → 0.001，并把终章容差显式设为 0.99（此前 0.005 的步长
+    让终章最高只能到约 0.986，被判为「接近」）。
+
+### 检查器自身的坑（记录以免误判）
+
+`document.body.innerText` 返回**渲染后**文本，`IoU` 标签带 CSS `uppercase` 会变成 `IOU`，
+因此正则 `/IoU\s*([0-9.]+)/` 一直返回 `null` —— 看起来像"产品没显示分数"，实际是探针写错了。
+改为 `/iou.../i` 后取到真实数值。**先怀疑夹具，再怀疑产品。**
+
+### 最终质量闸门
+
+```bash
+npx tsc --noEmit   # 0 error
+npm test           # 57/57
+npm run build      # 354 kB JS (gzip 110 kB)
+```

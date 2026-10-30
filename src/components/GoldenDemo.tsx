@@ -32,12 +32,26 @@ export function GoldenDemo({ className = '' }: { className?: string }) {
   const level = LEVELS[2];
   const reduced = usePrefersReducedMotion();
 
-  const { uncut, cutPatches, removed } = useMemo(() => {
-    const { folded, result } = foldCutUnfold(PAPER, level.foldPreset, [level.canonicalCut]);
-    return { uncut: folded.patches, cutPatches: result.patches, removed: result.removedInPacket };
+  const { uncut, cutPatches, removed, merged } = useMemo(() => {
+    const { folded, result, unfolded } = foldCutUnfold(PAPER, level.foldPreset, [
+      level.canonicalCut,
+    ]);
+    const merged = [
+      {
+        id: 'merged-sheet',
+        source: unfolded,
+        transform: [1, 0, 0, 1, 0, 0] as [number, number, number, number, number, number],
+        inverse: [1, 0, 0, 1, 0, 0] as [number, number, number, number, number, number],
+        history: [],
+        layer: 0,
+      },
+    ];
+    return { uncut: folded.patches, cutPatches: result.patches, removed: result.removedInPacket, merged };
   }, [level]);
 
-  const [phase, setPhase] = useState<Phase>('fold');
+  // Start on the finished diamond: the first paint is the payoff, then the reel
+  // runs fold -> cut -> unfold -> hold so the loop reads as a story.
+  const [phase, setPhase] = useState<Phase>('hold');
   const [t, setT] = useState(0);
 
   useEffect(() => {
@@ -48,7 +62,7 @@ export function GoldenDemo({ className = '' }: { className?: string }) {
     }
     let raf = 0;
     let last = 0;
-    let current: Phase = 'fold';
+    let current: Phase = 'hold';
     let elapsed = 0;
     const tick = (now: number) => {
       if (last === 0) last = now;
@@ -71,7 +85,7 @@ export function GoldenDemo({ className = '' }: { className?: string }) {
 
   const { patches, progress, showRemoved } = useMemo(() => {
     if (reduced) {
-      return { patches: cutPatches, progress: undefined, showRemoved: false };
+      return { patches: merged, progress: undefined, showRemoved: false };
     }
     if (phase === 'fold') {
       const pv = easeInOut(clamp01(t * 2));
@@ -99,11 +113,11 @@ export function GoldenDemo({ className = '' }: { className?: string }) {
       };
     }
     return {
-      patches: cutPatches,
-      progress: cutPatches.map((p) => progressFor(p, 0, 0)),
+      patches: merged,
+      progress: undefined,
       showRemoved: false,
     };
-  }, [phase, t, uncut, cutPatches, reduced]);
+  }, [phase, t, uncut, cutPatches, merged, reduced]);
 
   return (
     <div className={`relative ${className}`}>

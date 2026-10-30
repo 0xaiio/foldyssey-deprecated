@@ -367,7 +367,7 @@ function StudioRunner({ initial, artworkId }: { initial: StudioDoc; artworkId: s
                         value={c.offset}
                         min={-1.6}
                         max={1.6}
-                        step={0.005}
+                        step={0.001}
                         onChange={(v) => setCut(i, { ...c, offset: v }, `offset-${i}`)}
                         format={(v) => v.toFixed(3)}
                       />

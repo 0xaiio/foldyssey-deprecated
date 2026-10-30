@@ -340,7 +340,7 @@ def main() -> int:
                 "hasVerdict": ("完全吻合" in body) or ("未匹配" in body) or ("接近" in body),
                 "hasIou": "IoU" in body,
                 "iouText": cdp.eval(
-                    "(() => { const m = document.body.innerText.match(/IoU\\s*\\n?\\s*([0-9.]+)/); return m ? m[1] : null; })()"
+                    "(() => { const m = document.body.innerText.match(/iou\\s*\\n?\\s*([0-9.]+)/i); return m ? m[1] : null; })()"
                 ),
                 "paperSubpaths": cdp.eval(
                     "(() => { const p = document.querySelector('svg.paper-svg path'); return p ? (p.getAttribute('d').match(/M/g)||[]).length : null; })()"

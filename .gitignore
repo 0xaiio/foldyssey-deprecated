@@ -4,6 +4,7 @@ dist-ssr/
 .vite/
 coverage/
 .artifacts/
+.artifacts-prod/
 *.tsbuildinfo
 
 # secrets — never commit

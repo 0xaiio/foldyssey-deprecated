@@ -62,7 +62,7 @@ export function HomePage() {
             </div>
           </div>
           <p className="mt-3 text-center text-[0.72rem] text-ink-faint">
-            上面这段动画的每一帧都由几何引擎计算，可暂停、可复现。
+            上面这段动画的每一帧都由几何引擎计算，同一个 d 永远得到同一个孔洞。
           </p>
         </div>
       </section>

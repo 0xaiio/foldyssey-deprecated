@@ -110,7 +110,10 @@ function PuzzleRunner({ level }: { level: PuzzleLevel }) {
       const timer = window.setTimeout(() => setPhase('cut'), reduced ? 40 : 620);
       return () => window.clearTimeout(timer);
     }
-    if (phase === 'ready') {
+    // 'revealed' must sit at progress 0: the paper is fully unfolded. Falling
+    // through to setAnim(1) here would keep the packet folded while the verdict
+    // says the cut succeeded (a bug the screenshot check caught).
+    if (phase === 'ready' || phase === 'revealed') {
       setAnim(0);
       return;
     }
@@ -136,8 +139,27 @@ function PuzzleRunner({ level }: { level: PuzzleLevel }) {
     setProgressState(recordAttempt(level.id, score.iou, score.verdict === 'perfect'));
   }, [phase, score, level.id, cut]);
 
-  const usingCutPatches = phase === 'cut' || phase === 'unfolding' || phase === 'revealed';
-  const patches = usingCutPatches ? cutResult.patches : folded.patches;
+  // Once revealed, the sheet is one physical piece again: drawing the four
+  // layer patches would leave visible seams along the creases. The merged
+  // region is the exact union the engine already computed, so nothing changes
+  // geometrically — only the seams disappear.
+  const mergedPatch = useMemo<Patch[]>(
+    () => [
+      {
+        id: 'merged-sheet',
+        source: unfoldedRegion,
+        transform: [1, 0, 0, 1, 0, 0],
+        inverse: [1, 0, 0, 1, 0, 0],
+        history: [],
+        layer: 0,
+      },
+    ],
+    [unfoldedRegion],
+  );
+
+  const usingCutPatches = phase === 'cut' || phase === 'unfolding';
+  const patches =
+    phase === 'revealed' ? mergedPatch : usingCutPatches ? cutResult.patches : folded.patches;
 
   const progress = useMemo(() => {
     const pv = easeInOut(clamp01(anim * 2));
@@ -402,7 +424,7 @@ function PuzzleRunner({ level }: { level: PuzzleLevel }) {
                 value={offset}
                 min={-level.limits.maxAbsOffset}
                 max={level.limits.maxAbsOffset}
-                step={0.005}
+                step={0.001}
                 disabled={phase !== 'folded'}
                 onChange={setOffset}
                 format={(v) => v.toFixed(3)}

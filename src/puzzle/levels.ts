@@ -211,7 +211,9 @@ const SPECS: LevelSpec[] = [
     foldPreset: 'orthogonal2',
     canonicalCut: { nx: SQRT1_2, ny: SQRT1_2, offset: 1.0 * SQRT1_2, removedSide: 'positive' },
     limits: { angleLocked: null, maxAbsOffset: 1.7 },
-    tolerance: { iouPerfect: 0.995, iouClose: 0.95 },
+    // This level moves the whole silhouette, so IoU is far more sensitive to a
+    // 0.001 slider step than the hole levels. 0.99 still means "visually exact".
+    tolerance: { iouPerfect: 0.99, iouClose: 0.95 },
     hints: {
       observe: {
         zh: '目标不是孔洞，而是整张纸的轮廓：一个内接菱形。',

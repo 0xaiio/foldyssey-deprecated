@@ -203,7 +203,14 @@ export function PaperStage({
       onPointerLeave={endDrag}
     >
       <defs>
-        <linearGradient id="paperSheen" x1="0" y1="0" x2="0.6" y2="1">
+        <linearGradient
+          id="paperSheen"
+          gradientUnits="userSpaceOnUse"
+          x1={-VIEW_HALF}
+          y1={VIEW_HALF}
+          x2={VIEW_HALF}
+          y2={-VIEW_HALF}
+        >
           <stop offset="0%" stopColor="#ffffff" stopOpacity="0.22" />
           <stop offset="45%" stopColor="#ffffff" stopOpacity="0.04" />
           <stop offset="100%" stopColor="#000000" stopOpacity="0.07" />
