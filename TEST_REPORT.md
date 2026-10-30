@@ -135,3 +135,55 @@ DeferExecuteTool: workbuddy_sites_deploy
 
 - 判定出现时页面会自动滚动使结果卡进入视口；在极矮视口（<600px 高）下滚动幅度较大。
 - 关卡页在 1440×900 下需要滚动才能同时看到纸与"几何读数"卡片，主操作始终可见。
+
+---
+
+## 2026-10-30 · Milestone 3（工坊 / 作品集 / 数学页）
+
+### T7 单元测试（新增）
+
+```bash
+npm test
+```
+
+```
+✓ src/tests/geometry.test.ts (22 tests)
+✓ src/tests/levels.test.ts (23 tests)
+✓ src/tests/studio.test.ts (12 tests)
+
+Test Files  3 passed (3)
+     Tests  57 passed (57)
+```
+
+`studio.test.ts` 覆盖：作品保存→列表→重新载入、篡改缓存后仍按参数重算、
+非法 schemaVersion 拒绝、非法切线被过滤、复制/删除、`createdAt` 保留、
+localStorage 垃圾数据不崩溃、SVG 导出（2 个子路径 + evenodd + 标题转义 + 无外链）、
+透明底、文件名规则、4 套预设几何有效、菱形花环确实是环。
+
+### T8 浏览器端到端（工坊 + 作品集 + 数学页）
+
+```bash
+python tools/ui_check.py --url http://localhost:5173/ --out ./.artifacts
+```
+
+| 检查 | 结果 |
+|---|---|
+| 工坊预览路径数 | 36 ✅ |
+| 点「加一刀」后切线数 | `2 → 3` ✅ |
+| 点「保存作品」 | localStorage 出现 `foldyssey.gallery.v1` ✅ |
+| 点「导出 SVG」 | 触发下载、无异常 ✅ |
+| 工坊剩余面积读数 | `1.3505`（实时） ✅ |
+| 作品集卡片数 / 缩略图 | 1 / 3 条 path（含按钮图标） ✅ |
+| 数学页卡片 / 实验 SVG | 6 / 6 ✅ |
+| About 含「没有调用任何大模型」 | `true` ✅ |
+| 控制台错误 | `[]` ✅ |
+
+截图：`.artifacts/06-studio.png`、`06b-studio-added.png`、`06c-gallery.png`、
+`07-explore.png`、`07b-about.png`。
+
+### 已知问题（M3）
+
+- PNG 导出在无头浏览器中无法自动校验文件内容（下载目录不可控），
+  仅验证点击不抛错；SVG 导出已用字符串断言覆盖。
+- 工坊左栏在「正交双折」下只占四分之一画面，靠浅网格与虚线原始轮廓提供空间参照。
+- 未做 axe 无障碍扫描；仅人工检查焦点与标签。

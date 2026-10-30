@@ -4,7 +4,7 @@
 > **"已完成"必须有可执行的成果与证据**；没有证据的一律不算完成。
 > 本表在 M0–M4 每个里程碑结束时更新，SHA 来自 `git rev-parse HEAD`。
 
-当前里程碑：**M2（可玩关卡）**
+当前里程碑：**M3（工坊 / 作品集 / 数学页）**
 
 ---
 
@@ -14,8 +14,8 @@
 |---|---|---|---|---|---|---|
 | M0 | 仓库基线、品牌外壳、文档体系 | `7c5e996aa57c1a192fa8a796f9a9f452075451dc` | main | build ✅ | README、docs/*、TASKS、STATUS | ✅ 已推送（远端 main 一致） |
 | M1 | 几何引擎 + 黄金菱形 + 数学测试 | `20292e2e587a55c9bd3b2a003184957212e99abb` | main | 45/45 通过 · build ✅ | GEOMETRY_SPEC、TESTING、TEST_REPORT | ✅ 已推送 |
-| M2 | 可玩关卡 + 生产构建核验 + 发布尝试 | 见下一条目 | main | 45/45 · E2E 通关 · build ✅ | DEPLOYMENT、TEST_REPORT | ⚠️ 发布受阻（无部署工具） |
-| M3 | 工坊 / 作品集 / 数学页 | — | — | — | — | — |
+| M2 | 可玩关卡 + 生产构建核验 + 发布尝试 | `cbfd59be6715cfaabbcff6ecc65f214193783512` | main | 45/45 · E2E 通关 · build ✅ | DEPLOYMENT、TEST_REPORT | ✅ 已推送（发布仍受阻） |
+| M3 | 工坊 / 作品集 / 数学页 / 导出 | 见下一条目 | main | 57/57 · E2E 保存+导出 · build ✅ | AI_INTEGRATION、ADR×5、README、TEST_REPORT | 待执行 |
 | M4 | 打磨、投稿材料、线上核验 | — | — | — | — | — |
 
 ---
@@ -54,14 +54,14 @@
 
 | ID | 任务/验收条件 | 优先级 | 里程碑 | 状态 | 实现文件/思路 | 验证证据 | 遗留 |
 |---|---|---|---|---|---|---|---|
-| REQ-STD-001 | 双视图 | P0 | M3 | 未完成 | — | — | 待实现 |
-| REQ-STD-002 | 多刀叠加 | P0 | M3 | 未完成 | — | — | 待实现 |
-| REQ-STD-003 | 撤销/重做/重置 | P0 | M3 | 未完成 | — | — | 待实现 |
-| REQ-STD-004 | 4 套预设 + 自定义配色 | P1 | M3 | 未完成 | — | — | 待实现 |
-| REQ-STD-005 | SVG 导出 | P0 | M3 | 未完成 | — | — | 待实现 |
-| REQ-STD-006 | PNG 导出 | P0 | M3 | 未完成 | — | — | 待实现 |
-| REQ-STD-007 | 作品保存/载入/删除 | P0 | M3 | 未完成 | — | — | 待实现 |
-| REQ-STD-008 | 手工制作卡 | P1 | M3 | 未完成 | — | — | 待实现 |
+| REQ-STD-001 | 双视图 | P0 | M3 | 已完成 | `pages/Studio.tsx`（左纸包 / 右预览，同一份几何数据） | E2E：预览与导出同源 | — |
+| REQ-STD-002 | 多刀叠加 | P0 | M3 | 已完成 | `Studio.tsx` stages 逐刀作用于上一刀后的纸包 | E2E：加一刀 2→3 刀 | — |
+| REQ-STD-003 | 撤销/重做/重置 | P0 | M3 | 已完成 | `useHistory`（700ms 合并窗口 + 40 步栈） | 按钮状态与栈同步 | — |
+| REQ-STD-004 | 4 套预设 + 自定义配色 | P1 | M3 | 已完成 | `studio/presets.ts` + 色板组件 | 单测：4 套预设均产出有效图案 | — |
+| REQ-STD-005 | SVG 导出 | P0 | M3 | 已完成 | `services/export.ts:buildSvgDocument` | 单测：2 个子路径、evenodd、标题转义、无外链 | — |
+| REQ-STD-006 | PNG 导出 | P0 | M3 | 已完成 | `downloadPng`（SVG→canvas 2048²） | E2E 点击无异常 | 未做像素级比对 |
+| REQ-STD-007 | 作品保存/载入/删除 | P0 | M3 | 已完成 | `studio/artwork.ts` + `services/storage.ts` | 单测 7 条：round-trip、损坏数据、版本拒绝、复制删除 | — |
+| REQ-STD-008 | 手工制作卡 | P1 | M3 | 已完成 | `Studio.tsx` 可折叠面板（纸张/折叠/每刀参数/面积） | 与切线数据同源 | 无 PDF 输出 |
 
 ### 运行时 AI
 
@@ -79,9 +79,9 @@
 | REQ-PLAT-001 | 首页品牌与入口 | P0 | M0 | 已完成 | `src/pages/Home.tsx` | 浏览器 1440×900 截图 | 主视觉仍为静态草图，M1 替换 |
 | REQ-PLAT-002 | 首页真实几何动画 | P0 | M1 | 已完成 | `components/GoldenDemo.tsx`（逐帧由引擎计算，尊重 reduced-motion） | 首页截图 8 条纸张路径 + 运行时无报错 | — |
 | REQ-PLAT-003 | 移动端 390px 可用 | P0 | M2 | 部分完成 | 响应式栅格 + 触控手柄 | 390×844 无横向溢出、手柄可拖 | 未在真机验证 |
-| REQ-PLAT-004 | 可访问性 | P1 | M3 | 未完成 | — | — | 待实现 |
-| REQ-PLAT-005 | 数学解释 5 卡片 | P1 | M3 | 未完成 | — | — | 待实现 |
-| REQ-PLAT-006 | About 能力边界 | P0 | M3 | 未完成 | — | — | 待实现 |
+| REQ-PLAT-004 | 可访问性 | P1 | M3 | 部分完成 | 语义标签、`aria-label`、focus-visible、键盘可达 | 人工检查；未跑 axe | 未做自动化扫描 |
+| REQ-PLAT-005 | 数学解释 5 卡片 | P1 | M3 | 已完成 | `pages/Explore.tsx`（4 个可交互实验 + 1 张定理卡） | E2E：6 个 article、6 个 SVG | — |
+| REQ-PLAT-006 | About 能力边界 | P0 | M3 | 已完成 | `pages/About.tsx` | E2E：页面含「没有调用任何大模型」 | — |
 
 ### 发布 / 治理
 

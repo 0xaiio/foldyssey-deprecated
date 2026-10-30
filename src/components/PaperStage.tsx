@@ -68,6 +68,8 @@ export type PaperStageProps = {
   opacityOf?: (patch: Patch) => number;
   /** Draw the outline of the original sheet behind the paper for context. */
   ghost?: boolean;
+  /** Draw a faint 0.25-unit grid inside the sheet (workbench look). */
+  grid?: boolean;
   /** Extra SVG content drawn inside the model-space group (e.g. diff overlay). */
   overlay?: React.ReactNode;
 };
@@ -98,6 +100,7 @@ export function PaperStage({
   shadow = true,
   opacityOf,
   ghost = false,
+  grid = false,
   overlay,
 }: PaperStageProps) {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -211,6 +214,18 @@ export function PaperStage({
       </defs>
 
       <g transform="scale(1,-1)">
+        {grid && (
+          <g pointerEvents="none" aria-hidden="true">
+            {[-0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75].map((t) => (
+              <g key={t}>
+                <line x1={t} y1={-1} x2={t} y2={1} stroke="rgba(140,112,74,0.11)" strokeWidth={0.7} vectorEffect="non-scaling-stroke" />
+                <line x1={-1} y1={t} x2={1} y2={t} stroke="rgba(140,112,74,0.11)" strokeWidth={0.7} vectorEffect="non-scaling-stroke" />
+              </g>
+            ))}
+            <line x1="0" y1={-1} x2="0" y2={1} stroke="rgba(140,112,74,0.22)" strokeWidth={0.9} strokeDasharray="3 3" vectorEffect="non-scaling-stroke" />
+            <line x1={-1} y1="0" x2={1} y2="0" stroke="rgba(140,112,74,0.22)" strokeWidth={0.9} strokeDasharray="3 3" vectorEffect="non-scaling-stroke" />
+          </g>
+        )}
         {ghost && (
           <rect
             x="-1"

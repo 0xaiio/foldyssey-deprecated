@@ -351,11 +351,35 @@ def main() -> int:
         # ---------- studio ----------
         cdp.navigate(args.url + "#/studio")
         time.sleep(1.2)
+        scroll_top(cdp)
         cdp.shot(os.path.join(args.out, "06-studio.png"))
+        paths_before = cdp.eval("document.querySelectorAll('svg path').length")
+        cuts_before = cdp.eval("(document.body.innerText.match(/第 \\d+ 刀/g) || []).length")
+
+        added = click_by_text(cdp, "加一刀")
+        time.sleep(0.7)
+        cuts_after = cdp.eval("(document.body.innerText.match(/第 \\d+ 刀/g) || []).length")
+        scroll_top(cdp)
+        cdp.shot(os.path.join(args.out, "06b-studio-added.png"))
+
+        saved = click_by_text(cdp, "保存作品")
+        time.sleep(0.6)
+        gallery_keys = cdp.eval("Object.keys(localStorage).filter(k => k.indexOf('foldyssey') === 0)")
+
+        exported = click_by_text(cdp, "导出 SVG")
+        time.sleep(0.5)
+
         report["steps"].append(
             {
                 "step": "studio",
                 "hasPreview": cdp.eval("document.querySelectorAll('svg path').length > 4"),
+                "pathsBefore": paths_before,
+                "cutsBefore": cuts_before,
+                "cutsAfterAdd": cuts_after,
+                "addCutWorked": bool(added and cuts_after == cuts_before + 1),
+                "saved": bool(saved),
+                "storageKeys": gallery_keys,
+                "exportClicked": bool(exported),
                 "areaText": cdp.eval(
                     "(() => { const t = document.body.innerText; const m = t.match(/剩余面积\\s*\\n?\\s*([0-9.]+)/); return m ? m[1] : null; })()"
                 ),
@@ -363,12 +387,42 @@ def main() -> int:
             }
         )
 
+        # ---------- gallery ----------
+        cdp.navigate(args.url + "#/gallery")
+        time.sleep(1.0)
+        scroll_top(cdp)
+        cdp.shot(os.path.join(args.out, "06c-gallery.png"))
+        report["steps"].append(
+            {
+                "step": "gallery",
+                "cards": cdp.eval("document.querySelectorAll('article').length"),
+                "thumbPaths": cdp.eval("document.querySelectorAll('article svg path').length"),
+            }
+        )
+
         # ---------- explore ----------
         cdp.navigate(args.url + "#/explore")
         time.sleep(0.9)
+        scroll_top(cdp)
         cdp.shot(os.path.join(args.out, "07-explore.png"))
         report["steps"].append(
-            {"step": "explore", "cards": cdp.eval("document.querySelectorAll('article').length")}
+            {
+                "step": "explore",
+                "cards": cdp.eval("document.querySelectorAll('article').length"),
+                "widgetSvgs": cdp.eval("document.querySelectorAll('article svg').length"),
+            }
+        )
+
+        # ---------- about ----------
+        cdp.navigate(args.url + "#/about")
+        time.sleep(0.8)
+        scroll_top(cdp)
+        cdp.shot(os.path.join(args.out, "07b-about.png"))
+        report["steps"].append(
+            {
+                "step": "about",
+                "statesNoRuntimeAI": "没有调用任何大模型" in cdp.eval("document.body.innerText"),
+            }
         )
 
         # ---------- mobile ----------
