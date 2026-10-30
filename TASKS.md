@@ -16,7 +16,7 @@
 | M1 | 几何引擎 + 黄金菱形 + 数学测试 | `20292e2e587a55c9bd3b2a003184957212e99abb` | main | 45/45 · build ✅ | GEOMETRY_SPEC、TESTING、TEST_REPORT | ✅ 已推送 |
 | M2 | 可玩关卡 + 生产构建 E2E | `cbfd59be6715cfaabbcff6ecc65f214193783512` | main | 45/45 · 通关 · build ✅ | DEPLOYMENT、TEST_REPORT | ✅ 已推送 |
 | M3 | 工坊 / 作品集 / 数学页 / 导出 | `f2b2312f951b39679aeeaa148b4bf038aed63e0e` | main | 57/57 · E2E · build ✅ | AI_INTEGRATION、ADR×5、README | ✅ 已推送 |
-| M4 | 六关逐关验证、渲染缺陷修复、投稿材料 | 本条提交（见 `git log -1 --format=%H`） | main | 57/57 · 6/6 通关 · build ✅ | SUBMISSION×9、TEST_REPORT | ✅ 已推送 |
+| M4 | 六关逐关验证、渲染缺陷修复、投稿材料 | `f6158cdb854648c00bd6b063d7ea18130a614454` | main | 57/57 · 6/6 通关 · build ✅ | SUBMISSION×9、TEST_REPORT | ✅ 已推送 |
 
 ---
 
