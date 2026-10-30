@@ -2,6 +2,23 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)；版本遵循语义化版本。
 
+## [0.3.0] — 2026-10-30 · Milestone 2
+
+### 新增
+- **可玩关卡页**：`ready → folding → folded → cutting → cut → unfolding → revealed` 七态状态机
+- 切线交互：拖动端点旋转、拖动中点平移、角度/偏移滑块、一键换保留侧；动画期间按钮禁用防竞态
+- 判定面板：IoU、对称差比例、实得面积、几何化反馈文案、差异区域可视化
+- 三级提示（观察 / 操作 / 解答）逐步揭示
+- 本地进度：尝试次数、最佳 IoU、通关标记（localStorage）
+- 关卡栏：六关切换 + 通关打勾；判定出现时自动滚动到结果
+
+### 工程
+- 生产构建端到端验证：`vite preview` + CDP 全流程通关，控制台 0 错误
+- 新增 `docs/DEPLOYMENT.md`，如实记录发布阻塞
+
+### 已知限制
+- WorkBuddy 公开发布在本会话**受阻**（部署工具不可用），未取得公开链接
+
 ## [0.2.0] — 2026-10-30 · Milestone 1
 
 ### 新增

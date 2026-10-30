@@ -93,3 +93,45 @@ python tools/ui_check.py --url http://localhost:5173/ --out ./.artifacts
 | 真机 iOS / Android 测试 | 无设备；以 390×844 视口 + 触控事件模拟代替 |
 | Lighthouse 性能评分 | 未执行 |
 | 无障碍自动化扫描（axe） | 未执行；仅做人工焦点与对比度检查 |
+
+---
+
+## 2026-10-30 · Milestone 2（可玩关卡 + 生产构建核验）
+
+### T5 生产构建端到端（不是开发服务器）
+
+```bash
+npm run build
+npx vite preview --port 4173 --strictPort
+python tools/ui_check.py --url http://localhost:4173/ --out ./.artifacts-prod
+```
+
+结果（真实 `report.json`）：
+
+| 检查 | 结果 |
+|---|---|
+| `GET /` | `200` ✅ |
+| 首页标题 / h1 | `Foldyssey · 一刀万象` / `一刀万象` ✅ |
+| 折叠 → 剪 → 展开 三个按钮均可点 | ✅ |
+| **拖动切线中点手柄改变偏移** | `1.200 → 1.061` ✅ |
+| **按标准解（45°, 1.095, 正侧）通关** | 判定 `完全吻合` ✅ |
+| 桌面 1440×900 横向溢出 | `false` ✅ |
+| 手机 390×844 横向溢出 | `false` ✅ |
+| 控制台错误 | `[]` ✅ |
+
+> 这是关键证据：关卡**可以通过真实 UI 被解开**，不是只有单元测试里的数学断言。
+
+### T6 WorkBuddy 公开发布
+
+```text
+DeferExecuteTool: workbuddy_sites_deploy
+→ Tool "workbuddy_sites_deploy" is not available in the current environment or configuration.
+```
+
+- 结果：**受阻**。当前会话没有该部署工具，无法创建公开链接。
+- 处理：如实记录，不虚构 URL；见 `docs/DEPLOYMENT.md` §3。
+
+### 已知问题（M2）
+
+- 判定出现时页面会自动滚动使结果卡进入视口；在极矮视口（<600px 高）下滚动幅度较大。
+- 关卡页在 1440×900 下需要滚动才能同时看到纸与"几何读数"卡片，主操作始终可见。

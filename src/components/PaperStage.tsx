@@ -156,7 +156,11 @@ export function PaperStage({
     if (!onCutChange) return;
     e.stopPropagation();
     e.preventDefault();
-    (e.target as Element).setPointerCapture?.(e.pointerId);
+    try {
+      (e.target as Element).setPointerCapture?.(e.pointerId);
+    } catch {
+      /* synthetic pointer capture can fail; dragging still works via move events */
+    }
     dragRef.current = { mode, anchor };
     setDragging(mode);
   };
@@ -315,12 +319,14 @@ export function PaperStage({
               active={dragging === 'rotate'}
               cursor={angleLocked !== null ? 'ns-resize' : 'grab'}
               onPointerDown={onPointerDown('rotate', handleB)}
+              testId="handle-a"
             />
             <Handle
               p={handleB}
               active={dragging === 'rotate'}
               cursor={angleLocked !== null ? 'ns-resize' : 'grab'}
               onPointerDown={onPointerDown('rotate', handleA)}
+              testId="handle-b"
             />
             {segment && (
               <circle
@@ -332,6 +338,7 @@ export function PaperStage({
                 strokeWidth={1.4}
                 vectorEffect="non-scaling-stroke"
                 className="cut-handle"
+                data-handle="mid"
                 onPointerDown={onPointerDown('slide')}
               >
                 <title>拖动平移切线 / Drag to slide the cut</title>
@@ -351,11 +358,13 @@ function Handle({
   onPointerDown,
   cursor,
   active,
+  testId,
 }: {
   p: Vec2;
   onPointerDown: (e: React.PointerEvent) => void;
   cursor: string;
   active: boolean;
+  testId: string;
 }) {
   return (
     <g>
@@ -369,6 +378,7 @@ function Handle({
         strokeWidth={2}
         vectorEffect="non-scaling-stroke"
         style={{ cursor }}
+        data-handle={testId}
         onPointerDown={onPointerDown}
       />
     </g>

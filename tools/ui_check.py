@@ -111,6 +111,85 @@ def scroll_top(cdp: CDP) -> None:
     time.sleep(0.35)
 
 
+
+def element_center(cdp: CDP, selector: str):
+    js = """
+    (() => {
+      const el = document.querySelector(%s);
+      if (!el) return null;
+      el.scrollIntoView({block: 'center'});
+      const r = el.getBoundingClientRect();
+      return {x: r.left + r.width/2, y: r.top + r.height/2, w: r.width, h: r.height};
+    })()
+    """ % json.dumps(selector)
+    return cdp.eval(js)
+
+
+def drag(cdp: CDP, selector: str, dx: float, dy: float) -> bool:
+    c = element_center(cdp, selector)
+    if not c:
+        return False
+    time.sleep(0.3)
+    c = element_center(cdp, selector)
+    if not c:
+        return False
+    x, y = c["x"], c["y"]
+    cdp.send("Input.dispatchMouseEvent", {"type": "mouseMoved", "x": x, "y": y, "button": "none"})
+    cdp.send(
+        "Input.dispatchMouseEvent",
+        {"type": "mousePressed", "x": x, "y": y, "button": "left", "buttons": 1, "clickCount": 1},
+    )
+    steps = 6
+    for i in range(1, steps + 1):
+        cdp.send(
+            "Input.dispatchMouseEvent",
+            {
+                "type": "mouseMoved",
+                "x": x + dx * i / steps,
+                "y": y + dy * i / steps,
+                "button": "left",
+                "buttons": 1,
+            },
+        )
+        time.sleep(0.02)
+    cdp.send(
+        "Input.dispatchMouseEvent",
+        {"type": "mouseReleased", "x": x + dx, "y": y + dy, "button": "left", "buttons": 0, "clickCount": 1},
+    )
+    time.sleep(0.25)
+    return True
+
+
+def read_offset(cdp: CDP):
+    js = """
+    (() => {
+      const rows = Array.from(document.querySelectorAll('dl div'));
+      const row = rows.find(r => (r.innerText||'').includes('偏移'));
+      if (!row) return null;
+      const m = (row.innerText||'').match(/([0-9]+\.[0-9]+)/);
+      return m ? m[1] : null;
+    })()
+    """
+    return cdp.eval(js)
+
+
+def set_slider(cdp: CDP, selector: str, value: float) -> bool:
+    js = """
+    (() => {
+      const el = document.querySelector(%s);
+      if (!el) return false;
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      setter.call(el, String(%s));
+      el.dispatchEvent(new Event('input', {bubbles: true}));
+      el.dispatchEvent(new Event('change', {bubbles: true}));
+      return true;
+    })()
+    """ % (json.dumps(selector), value)
+    ok = bool(cdp.eval(js))
+    time.sleep(0.35)
+    return ok
+
+
 def click_by_text(cdp: CDP, text: str, tag: str = "button") -> bool:
     js = """
     (() => {
@@ -224,6 +303,17 @@ def main() -> int:
         cdp.shot(os.path.join(args.out, "03-puzzle-folded.png"))
         folded_label = cdp.eval("(document.body.innerText.includes('折叠中') ? 'busy' : 'idle')")
 
+        # --- drag test: sliding the mid handle must change the offset ---
+        before_offset = read_offset(cdp)
+        dragged = drag(cdp, '[data-handle="mid"]', 0, 46)
+        after_offset = read_offset(cdp)
+        cdp.shot(os.path.join(args.out, "03b-puzzle-dragged.png"))
+
+        # --- solve the level through the real UI ---
+        set_slider(cdp, "#cut-angle", 45)
+        set_slider(cdp, "#cut-offset", 1.0960)
+        solved_offset = read_offset(cdp)
+
         ok_snip = click_by_text(cdp, "剪一刀")
         time.sleep(1.0)
         scroll_top(cdp)
@@ -242,6 +332,11 @@ def main() -> int:
                 "foldedLabel": folded_label,
                 "clickedSnip": ok_snip,
                 "clickedUnfold": ok_unfold,
+                "dragChangedOffset": bool(before_offset and after_offset and before_offset != after_offset),
+                "offsetBefore": before_offset,
+                "offsetAfterDrag": after_offset,
+                "offsetSolved": solved_offset,
+                "perfect": "完全吻合" in body,
                 "hasVerdict": ("完全吻合" in body) or ("未匹配" in body) or ("接近" in body),
                 "hasIou": "IoU" in body,
                 "iouText": cdp.eval(

@@ -7,12 +7,12 @@
 
 | 项 | 值 |
 |---|---|
-| 当前里程碑 | **M1 几何内核 + 黄金闭环** |
+| 当前里程碑 | **M2 可玩关卡** |
 | 分支 | `main` |
 | 最近提交 | 见 `git log -3 --oneline` |
 | 构建 | ✅ `npm run build` |
 | 测试 | ✅ 45/45（`npm test`） |
-| 发布地址 | ⬜ 尚未发布（M2） |
+| 发布地址 | ⛔ 受阻：本会话无 `workbuddy_sites_deploy` |
 | 技术栈 | React 19 · TypeScript 7 · Vite 8 · Tailwind 4 · polygon-clipping · Vitest |
 
 ## 已通过的能力
@@ -21,15 +21,16 @@
 - **黄金样例**：正交双折 + `u+v<d` → `|x|+|y|<d`，面积 `2d²`，四重镜像对称，误差 < 1e-9
 - **六个关卡数据**：目标由标准解正向构造，逐关自动验证可通关
 - **首页实时动画**：折叠 → 剪切 → 展开，逐帧来自引擎，支持 `prefers-reduced-motion`
-- 品牌外壳与路由；文档体系（含 GEOMETRY_SPEC / TESTING / TEST_REPORT）
+- **可玩关卡**：七态状态机、切线拖拽/滑块、目标对照、差异层、三级提示、本地进度
+- 品牌外壳与路由；文档体系（含 GEOMETRY_SPEC / TESTING / TEST_REPORT / DEPLOYMENT）
 
 ## 未完成 / 失败项
 
 | 项 | 现状 | 下一步 |
 |---|---|---|
-| 可玩关卡 UI | 占位页 | M2：状态机、切线交互、评分面板 |
 | 工坊 / 作品集 / 数学页 | 占位页 | M3 |
-| 公开链接 | 无 | M2 首次发布 |
+| 公开链接 | 无（工具不可用） | 需用户在 WorkBuddy 内执行发布 |
+| 真机验证 | 未做 | 仅有 390×844 视口模拟 |
 | 运行时 AI | 未实现 | 见 `docs/ASSUMPTIONS.md` A-001 |
 | Playwright / 真机 | 未执行 | 以 Edge CDP + 视口模拟代替 |
 
@@ -51,7 +52,7 @@ src/geometry/fold.ts        # 折叠分区（buildFoldState）
 src/geometry/cut.ts         # applyCut / foldCutUnfold
 src/components/PaperStage.tsx  # 渲染 + 切线交互（含 lineSegmentInSquare）
 src/puzzle/levels.ts        # 6 关数据
-src/pages/Puzzle.tsx        # 待替换为真实关卡页
+src/pages/Puzzle.tsx        # 关卡页（状态机 + 交互 + 判定）
 
 # 命令
 npm run dev      # http://localhost:5173（不要用 127.0.0.1）

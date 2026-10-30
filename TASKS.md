@@ -4,7 +4,7 @@
 > **"已完成"必须有可执行的成果与证据**；没有证据的一律不算完成。
 > 本表在 M0–M4 每个里程碑结束时更新，SHA 来自 `git rev-parse HEAD`。
 
-当前里程碑：**M1（几何内核 + 黄金闭环）**
+当前里程碑：**M2（可玩关卡）**
 
 ---
 
@@ -13,8 +13,8 @@
 | 里程碑 | 摘要 | Commit SHA | 分支 | 测试结果 | 文档更新 | Push |
 |---|---|---|---|---|---|---|
 | M0 | 仓库基线、品牌外壳、文档体系 | `7c5e996aa57c1a192fa8a796f9a9f452075451dc` | main | build ✅ | README、docs/*、TASKS、STATUS | ✅ 已推送（远端 main 一致） |
-| M1 | 几何引擎 + 黄金菱形 + 数学测试 | 见下一条目 | main | 45/45 通过 · build ✅ | GEOMETRY_SPEC、TESTING、TEST_REPORT | 待执行 |
-| M2 | 可玩关卡 + 首次发布 | — | — | — | — | — |
+| M1 | 几何引擎 + 黄金菱形 + 数学测试 | `20292e2e587a55c9bd3b2a003184957212e99abb` | main | 45/45 通过 · build ✅ | GEOMETRY_SPEC、TESTING、TEST_REPORT | ✅ 已推送 |
+| M2 | 可玩关卡 + 生产构建核验 + 发布尝试 | 见下一条目 | main | 45/45 · E2E 通关 · build ✅ | DEPLOYMENT、TEST_REPORT | ⚠️ 发布受阻（无部署工具） |
 | M3 | 工坊 / 作品集 / 数学页 | — | — | — | — | — |
 | M4 | 打磨、投稿材料、线上核验 | — | — | — | — | — |
 
@@ -43,12 +43,12 @@
 |---|---|---|---|---|---|---|---|
 | REQ-GAME-001 | 6 关，标准解正向构造 | P0 | M1 | 已完成 | `puzzle/levels.ts`（target 由 `foldCutUnfold` 生成） | `levels.test.ts` 逐关 IoU=1 | 可玩 UI 待 M2 |
 | REQ-GAME-002 | 关卡数据结构完整 | P0 | M1 | 已完成 | `puzzle/levels.ts:PuzzleLevel` | 6 关 × 字段断言（id/难度/容差/提示/seed） | — |
-| REQ-GAME-003 | 七态状态机 + 防竞态 | P0 | M2 | 未完成 | — | — | 待实现 |
-| REQ-GAME-004 | 切线交互（拖拽 + 滑块） | P0 | M2 | 未完成 | — | — | 待实现 |
-| REQ-GAME-005 | 目标对照 + 差异层 | P0 | M2 | 未完成 | — | — | 待实现 |
-| REQ-GAME-006 | 几何化反馈 | P0 | M2 | 未完成 | — | — | 待实现 |
-| REQ-GAME-007 | 三级提示 | P0 | M2 | 未完成 | — | — | 待实现 |
-| REQ-GAME-008 | 本地进度 | P1 | M2 | 未完成 | — | — | 待实现 |
+| REQ-GAME-003 | 七态状态机 + 防竞态 | P0 | M2 | 已完成 | `pages/Puzzle.tsx`（ready→folding→folded→cutting→cut→unfolding→revealed） | 动画期间按钮 `disabled`；E2E 连点无异常 | — |
+| REQ-GAME-004 | 切线交互（拖拽 + 滑块） | P0 | M2 | 已完成 | `PaperStage.tsx`（端点旋转/中点平移/滑块/换侧） | E2E 拖动：偏移 1.200→1.061 | — |
+| REQ-GAME-005 | 目标对照 + 差异层 | P0 | M2 | 已完成 | `Puzzle.tsx:GoalPanel/ResultPanel` + `overlay` | 目标缩略图 + 差异区域可切换 | — |
+| REQ-GAME-006 | 几何化反馈 | P0 | M2 | 已完成 | `geometry/metrics.ts:explainScore` | 剪多了/剪少了/位置角度/保留侧反了 四类文案 | — |
+| REQ-GAME-007 | 三级提示 | P0 | M2 | 已完成 | `Puzzle.tsx` 提示面板逐条揭示 | 未揭示显示占位，逐步展开 | — |
+| REQ-GAME-008 | 本地进度 | P1 | M2 | 已完成 | `puzzle/progress.ts` + 关卡栏打勾 | localStorage `foldyssey.progress.v1` | — |
 
 ### 工坊
 
@@ -78,7 +78,7 @@
 |---|---|---|---|---|---|---|---|
 | REQ-PLAT-001 | 首页品牌与入口 | P0 | M0 | 已完成 | `src/pages/Home.tsx` | 浏览器 1440×900 截图 | 主视觉仍为静态草图，M1 替换 |
 | REQ-PLAT-002 | 首页真实几何动画 | P0 | M1 | 已完成 | `components/GoldenDemo.tsx`（逐帧由引擎计算，尊重 reduced-motion） | 首页截图 8 条纸张路径 + 运行时无报错 | — |
-| REQ-PLAT-003 | 移动端 390px 可用 | P0 | M2 | 未完成 | — | — | 待验证 |
+| REQ-PLAT-003 | 移动端 390px 可用 | P0 | M2 | 部分完成 | 响应式栅格 + 触控手柄 | 390×844 无横向溢出、手柄可拖 | 未在真机验证 |
 | REQ-PLAT-004 | 可访问性 | P1 | M3 | 未完成 | — | — | 待实现 |
 | REQ-PLAT-005 | 数学解释 5 卡片 | P1 | M3 | 未完成 | — | — | 待实现 |
 | REQ-PLAT-006 | About 能力边界 | P0 | M3 | 未完成 | — | — | 待实现 |
@@ -89,7 +89,7 @@
 |---|---|---|---|---|---|---|---|
 | REQ-REL-001 | 生产构建 | P0 | M0 | 已完成 | `npm run build` | `dist/` 产物；vite 构建成功 | — |
 | REQ-REL-002 | 单元测试 | P0 | M1 | 已完成 | `src/tests/geometry.test.ts`、`levels.test.ts` | 45/45 通过（见 TEST_REPORT T2） | — |
-| REQ-REL-003 | 公开 HTTPS 链接 | P0 | M2 | 未完成 | — | — | 待发布 |
+| REQ-REL-003 | 公开 HTTPS 链接 | P0 | M2 | 受阻 | — | 工具 `workbuddy_sites_deploy` 在本会话不可用 | 需用户在 WorkBuddy 内发布 |
 | REQ-REL-004 | 线上核验 | P0 | M4 | 未完成 | — | — | 待执行 |
 | REQ-DOC-001 | 文档体系 | P0 | M0 | 已完成 | `README.md` + `docs/*` | 8 份基线文档 | 几何/测试文档随 M1 补 |
 | REQ-DOC-002 | 任务表 + 证据 + SHA | P0 | 全程 | 部分完成 | 本文件 | 逐项状态已登记 | SHA 待各里程碑回填 |
