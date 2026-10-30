@@ -2,6 +2,23 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)；版本遵循语义化版本。
 
+## [0.2.0] — 2026-10-30 · Milestone 1
+
+### 新增
+- **几何内核**（`src/geometry/`）：纸张模型、等距变换与逆、四种固定折法、
+  逐层半平面裁剪、逆映射展开、IoU/对称差评分、SVG 路径生成（含孔洞）
+- **黄金样例**：正交双折剪去纸包内角 → 中心菱形孔洞，面积 `2d²`，四重镜像对称
+- **六个关卡数据**：目标由标准解正向构造，逐关自动验证
+- **首页实时动画**：真实折叠 → 剪切 → 展开，逐帧由引擎计算；`prefers-reduced-motion` 下降级为静帧
+- 文档：`docs/GEOMETRY_SPEC.md`、`docs/TESTING.md`、`TEST_REPORT.md`
+
+### 修复（开发期）
+- 展开曾误用 `transform(source)` 而非 `source`，导致四层被折叠两次、展开面积只剩 1/4。
+  已由 INV-2 测试锁死，并写入 `docs/GEOMETRY_SPEC.md` §5。
+
+### 测试
+- `npm test`：45/45 通过（geometry 22 + levels 23）
+
 ## [0.1.0] — 2026-10-30 · Milestone 0
 
 ### 新增

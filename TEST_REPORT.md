@@ -1,0 +1,95 @@
+# 测试执行记录（TEST_REPORT）
+
+> 只记录**实际执行过**的命令与真实结果。未执行的项写"未执行"，失败项写失败原因。
+> 环境：Windows 11 · Node v22.22.2 · npm 10.9.7 · Edge headless（CDP）
+
+---
+
+## 2026-10-30 · Milestone 1（几何内核）
+
+### T1 类型检查
+
+```bash
+npx tsc --noEmit
+```
+
+- 退出码：`0`
+- 结果：**通过**，无错误。
+
+### T2 单元测试
+
+```bash
+npm test        # vitest run
+```
+
+```
+✓ src/tests/geometry.test.ts (22 tests) 55ms
+✓ src/tests/levels.test.ts (23 tests) 36ms
+
+Test Files  2 passed (2)
+     Tests  45 passed (45)
+  Duration  917ms
+```
+
+- 结果：**45/45 通过**。
+- 覆盖：黄金菱形孔洞（`d = 0.2 / 0.35 / 0.6`）、展开面积守恒、四重镜像对称、
+  逐层逆映射、切线未命中、非法法向量、确定性、孔洞内环、IoU/对称差、
+  六关标准解可通关、初始切线不通关、无关切线被判 miss。
+
+### T3 生产构建
+
+```bash
+npm run build
+```
+
+```
+dist/index.html                   1.15 kB │ gzip:   0.66 kB
+dist/assets/index-upTmoOXo.css   31.38 kB │ gzip:   6.96 kB
+dist/assets/index-BcgXIkVK.js   292.09 kB │ gzip:  92.44 kB
+✓ built in 850ms
+```
+
+- 结果：**通过**。
+
+### T4 浏览器端到端（首页动画 + 关卡流程）
+
+```bash
+python tools/ui_check.py --url http://localhost:5173/ --out ./.artifacts
+```
+
+结果摘要（真实 `report.json`）：
+
+| 检查 | 结果 |
+|---|---|
+| 页面标题 | `Foldyssey · 一刀万象` ✅ |
+| 首页 h1 | `一刀万象` ✅ |
+| 首页纸张路径数 | 8（4 层 × 填充 + 高光） ✅ |
+| 桌面 1440×900 横向溢出 | `false` ✅ |
+| 折叠按钮可点 | `true` ✅ |
+| 剪一刀按钮可点 | `true` ✅ |
+| 展开按钮可点 | `true` ✅ |
+| 出现判定文案 | `true` ✅ |
+| 手机 390×844 横向溢出 | `false` ✅ |
+| 手机切线手柄数 | 1（中点手柄）+ 2 端点 ✅ |
+| 控制台错误 | `[]` ✅ |
+
+- 截图：`.artifacts/01-home-desktop.png` … `09-puzzle-mobile-folded.png`
+- 结果：**通过**（无 console error / 未捕获异常）。
+
+### 已知问题
+
+- 关卡页在 900px 高的桌面视口下需要滚动才能看到"当前折叠方案"信息卡；
+  主操作按钮在首屏内可见，不影响通关。
+- `tools/ui_check.py` 中的 `iouText` 正则未取到数值（DOM 结构变化），
+  判定文案已通过 `innerText` 命中；**该正则失效不影响结论**，后续修正。
+
+---
+
+## 未执行（如实记录）
+
+| 项 | 原因 |
+|---|---|
+| Playwright 多浏览器 E2E | 未安装；改用 Edge CDP 脚本覆盖同等场景 |
+| 真机 iOS / Android 测试 | 无设备；以 390×844 视口 + 触控事件模拟代替 |
+| Lighthouse 性能评分 | 未执行 |
+| 无障碍自动化扫描（axe） | 未执行；仅做人工焦点与对比度检查 |
